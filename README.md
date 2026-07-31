@@ -1,6 +1,6 @@
-# Process-Model-Driven Agile (PMDA) Tool
+# Agile Business Process Modeling
 
-**PMDAgile** is a research prototype implementing the **Process-Model-Driven Agile (PMDA)** framework.
+This is a research prototype.
 
 It allows you to:
 
@@ -24,7 +24,7 @@ The project is composed of three main components:
 
 ## Prerequisites
 
-Before running PMDAgile locally, ensure the following tools are installed:
+Before running this application locally, ensure the following tools are installed:
 
 ### Docker
 - Docker or Docker Desktop
@@ -43,7 +43,7 @@ Before running PMDAgile locally, ensure the following tools are installed:
 
 ### Jira Integration (Optional)
 To enable Jira connectivity, complete the following steps:
-1. **Register PMDAgile as an OAuth 2.0 application**\
+1. **Register this application as an OAuth 2.0 application**\
 Follow Atlassian's guide [in the "Enabling OAuth 2.0 (3LO)" section](https://developer.atlassian.com/cloud/jira/platform/oauth-2-3lo-apps/#enabling-oauth-2-0--3lo-).\
 **Important:** set the following Callback URL: `http://localhost:4200/profile`
 
@@ -60,8 +60,8 @@ Follow Atlassian's guide [in the "Enabling OAuth 2.0 (3LO)" section](https://dev
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/PMDAgile/process-model-driven-agile.git
-cd process-model-driven-agile
+git clone https://github.com/Agile-BPM/agile-business-process-modeling.git
+cd agile-business-process-modeling
 ```
 
 ---
