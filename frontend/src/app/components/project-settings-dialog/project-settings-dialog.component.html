@@ -1,0 +1,399 @@
+<div class="dialog-overlay" *ngIf="isOpen" (click)="onBackdropClick($event)">
+    <div class="dialog-container" role="dialog" aria-labelledby="dialog-title" aria-modal="true">
+        <!-- Header -->
+        <div class="dialog-header">
+            <div class="header-content">
+                <div class="header-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73v.18a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/>
+                        <circle cx="12" cy="12" r="3"/>
+                    </svg>
+                </div>
+                <div class="header-text">
+                    <h2 id="dialog-title">Project Settings</h2>
+                    <p>{{ project?.name || 'Loading...' }}</p>
+                </div>
+            </div>
+            <button class="close-button" (click)="close()" aria-label="Close dialog">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"/>
+                    <line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+            </button>
+        </div>
+
+        <!-- Content -->
+        <div class="dialog-content">
+            <!-- Sprints Section -->
+            <div class="section">
+                <div class="section-header">
+                    <h3>
+                        <!-- Updated sprint icon to use new running/sprint icon -->
+                        <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor">
+                            <path d="M600-280q-73 0-127.5-45.5T404-440H160v-80h244q5-23 13.5-43t22.5-37H240v-80h360q83 0 141.5 58.5T800-480q0 83-58.5 141.5T600-280Zm0-80q50 0 85-35t35-85q0-50-35-85t-85-35q-50 0-85 35t-35 85q0 50 35 85t85 35Zm-320 80v-80h120v80H280Zm320-200Z"/>
+                        </svg>
+                        Sprints Management
+                    </h3>
+                    <button class="create-button" (click)="showCreateForm()" [disabled]="showCreateSprintForm">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                             stroke-width="2">
+                            <line x1="12" y1="5" x2="12" y2="19"/>
+                            <line x1="5" y1="12" x2="19" y2="12"/>
+                        </svg>
+                        Start new Sprint
+                    </button>
+                </div>
+
+                <!-- Create Sprint Form -->
+                <div class="create-sprint-form" *ngIf="showCreateSprintForm">
+                    <div class="form-group">
+                        <label for="sprintName">Sprint Name</label>
+                        <input
+                                id="sprintName"
+                                type="text"
+                                [(ngModel)]="newSprintName"
+                                (input)="onSprintNameChange()"
+                                class="form-input"
+                                [class.error]="createSprintError"
+                                placeholder="Enter sprint name..."
+                                maxlength="100"
+                                autocomplete="off"
+                        />
+                        <div class="error-message" *ngIf="createSprintError">
+                            {{ createSprintError }}
+                        </div>
+                    </div>
+                    <div class="form-actions">
+                        <button class="cancel-button" (click)="hideCreateForm()">
+                            Cancel
+                        </button>
+                        <button
+                                class="submit-button"
+                                (click)="createSprint()"
+                                [disabled]="!newSprintName.trim()"
+                        >
+                            <span>Create Sprint</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Sprints List -->
+                <div class="sprints-container">
+                    <div class="loading-state" *ngIf="isLoadingSprints">
+                        <div class="spinner"></div>
+                        <span>Loading sprints...</span>
+                    </div>
+
+                    <div class="empty-state" *ngIf="!isLoadingSprints && project.sprints.length === 0">
+                        <!-- Updated empty state sprint icon to match new design -->
+                        <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor">
+                            <path d="M600-280q-73 0-127.5-45.5T404-440H160v-80h244q5-23 13.5-43t22.5-37H240v-80h360q83 0 141.5 58.5T800-480q0 83-58.5 141.5T600-280Zm0-80q50 0 85-35t35-85q0-50-35-85t-85-35q-50 0-85 35t-35 85q0 50 35 85t85 35Zm-320 80v-80h120v80H280Zm320-200Z"/>
+                        </svg>
+                        <p>No sprints found</p>
+                        <span>Create your first sprint to get started</span>
+                    </div>
+
+                    <div class="sprints-list" *ngIf="!isLoadingSprints && project.sprints.length > 0">
+                        <div class="sprint-item" *ngFor="let sprint of project.sprints; index as i">
+                            <!-- Made entire sprint-info section clickable for toggle functionality -->
+                            <div class="sprint-info" (click)="toggleSprintAccordion(sprint.id)">
+                                <div class="sprint-icon">
+                                    <!-- Updated individual sprint item icon to match new design -->
+                                    <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor">
+                                        <path d="M600-280q-73 0-127.5-45.5T404-440H160v-80h244q5-23 13.5-43t22.5-37H240v-80h360q83 0 141.5 58.5T800-480q0 83-58.5 141.5T600-280Zm0-80q50 0 85-35t35-85q0-50-35-85t-85-35q-50 0-85 35t-35 85q0 50 35 85t85 35Zm-320 80v-80h120v80H280Zm320-200Z"/>
+                                    </svg>
+                                </div>
+                                <div class="sprint-details">
+                                    <h4>{{ sprint.name }} <span class="sprint-status" [ngClass]="getStatusClass(sprint.status)">{{ sprint.status }}</span></h4>
+                                </div>
+                                <!-- Removed separate click handler from toggle button since entire card is now clickable -->
+                                <button
+                                        class="sprint-toggle-button"
+                                        [class.expanded]="isSprintExpanded[sprint.id]"
+                                        title="Toggle sprint models"
+                                >
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                         stroke-width="2" class="toggle-icon" [class.rotated]="isSprintExpanded[sprint.id]">
+                                        <polyline points="6,9 12,15 18,9"/>
+                                    </svg>
+                                </button>
+                            </div>
+
+                            <!-- Models container now uses accordion state and shows cross-sprint comparison -->
+                            <div class="models-container" *ngIf="getSprintModels(sprint.id).length > 0 && isSprintExpanded[sprint.id]">
+                                <div class="models-header">
+                                    <div class="models-header-content">
+                                        <span class="models-count">{{ getSprintModels(sprint.id).length }} model(s)</span>
+                                        <button *ngIf="sprint.status === 'active'"
+                                                class="create-version-button"
+                                                (click)="createNewVersion(sprint)"
+                                                title="Create new version for this sprint"
+                                        >
+                                          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <line x1="12" y1="5" x2="12" y2="19"/>
+                                            <line x1="5" y1="12" x2="19" y2="12"/>
+                                          </svg>
+                                          Create New Version
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="models-list">
+                                    <div class="model-item" *ngFor="let model of getSprintModels(sprint.id); index as i">
+                                        <div class="model-icon">
+                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                 stroke-width="2">
+                                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                                                <polyline points="14,2 14,8 20,8"/>
+                                                <line x1="16" y1="13" x2="8" y2="13"/>
+                                                <line x1="16" y1="17" x2="8" y2="17"/>
+                                                <polyline points="10,9 9,9 8,9"/>
+                                            </svg>
+                                        </div>
+                                        <div class="model-details">
+                                            <span class="model-name">{{ model.name }}</span>
+                                        </div>
+
+                                        <!-- Updated version selector to support cross-sprint comparison -->
+                                        <div class="version-selector-container" *ngIf="hasAvailableVersionsForComparison(model)">
+                                            <button
+                                                    class="compare-model-button"
+                                                    (click)="toggleVersionSelector(sprint.id + '_' + model.id)"
+                                                    [class.active]="showVersionSelector[sprint.id + '_' + model.id]"
+                                                    title="Compare with other versions"
+                                            >
+                                                <span class="compare-text">compare with version</span>
+                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                     stroke-width="2" class="dropdown-icon" [class.rotated]="showVersionSelector[sprint.id + '_' + model.id]">
+                                                    <polyline points="6,9 12,15 18,9"/>
+                                                </svg>
+                                            </button>
+
+                                            <div class="version-dropdown-menu" *ngIf="showVersionSelector[sprint.id + '_' + model.id]">
+                                                <div class="dropdown-header">Select version to compare with:</div>
+
+                                                <!-- Added cross-sprint version comparison options -->
+                                                <div *ngFor="let projectSprint of project.sprints" class="sprint-versions-group">
+                                                    <div class="sprint-group-header" *ngIf="getAvailableVersionsInSprint(model, projectSprint.id).length > 0">
+                                                        {{ projectSprint.name }}
+                                                    </div>
+                                                    <div
+                                                            class="version-dropdown-item"
+                                                            *ngFor="let comparisonModel of getAvailableVersionsInSprint(model, projectSprint.id)"
+                                                            (click)="selectComparisonVersion(model, comparisonModel, sprint.id)"
+                                                    >
+                                                        <div class="version-info">
+                                                            <span class="version-name">{{ comparisonModel.name }}</span>
+                                                            <span class="version-sprint">{{ projectSprint.name }}</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <button
+                                                class="delete-model-button"
+                                                *ngIf="i > 0"
+                                                (click)="deleteModel(model)"
+                                                title="Delete this model"
+                                        >
+                                            <span class="delete-text">delete</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <button
+                                    *ngIf="i != 0"
+                                    class="delete-sprint-button"
+                                    (click)="deleteSprint(sprint)"
+                                    [disabled]="isDeletingSprint[sprint.id]"
+                                    [title]="'Delete ' + sprint.name"
+                            >
+                <span *ngIf="!isDeletingSprint[sprint.id]">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                       stroke-width="2">
+                    <path d="M3 6h18"/>
+                    <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
+                    <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
+                  </svg>
+                </span>
+                                <span *ngIf="isDeletingSprint[sprint.id]" class="loading-content">
+                  <div class="spinner-small"></div>
+                </span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Project Sharing Section -->
+            <div class="section">
+                <div class="section-header">
+                    <h3>
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                             stroke-width="2">
+                            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+                            <circle cx="9" cy="7" r="4"/>
+                            <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
+                            <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                        </svg>
+                        Project Sharing
+                    </h3>
+                </div>
+
+                <div class="sharing-content">
+                    <div class="sharing-info">
+                        <p>Share this project with team members to collaborate on sprints and models.</p>
+                    </div>
+
+                    <!-- Share Project Form -->
+                    <div class="share-project-form">
+                        <div class="form-group">
+                            <label for="shareEmail">Email Address</label>
+                            <div class="input-with-button">
+                                <input
+                                        id="shareEmail"
+                                        type="email"
+                                        [(ngModel)]="shareEmail"
+                                        (input)="onShareEmailChange()"
+                                        class="form-input"
+                                        [class.error]="shareProjectError"
+                                        placeholder="Enter email address..."
+                                        autocomplete="email"
+                                        [disabled]="isSharingProject"
+                                />
+                                <button
+                                        class="share-button"
+                                        (click)="shareProject()"
+                                        [disabled]="!isValidEmail(shareEmail) || isSharingProject"
+                                >
+                  <span *ngIf="!isSharingProject">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                         stroke-width="2">
+                      <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/>
+                      <polyline points="16,6 12,2 8,6"/>
+                      <line x1="12" y1="2" x2="12" y2="15"/>
+                    </svg>
+                    Share
+                  </span>
+                                    <span *ngIf="isSharingProject" class="loading-content">
+                    <div class="spinner"></div>
+                    Sharing...
+                  </span>
+                                </button>
+                            </div>
+                            <div class="error-message" *ngIf="shareProjectError">
+                                {{ shareProjectError }}
+                            </div>
+                            <div class="success-message" *ngIf="shareProjectSuccess">
+                                {{ shareProjectSuccess }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Jira Integration Section -->
+            <div class="section" *ngIf="user.isJiraAuthenticated">
+                <div class="section-header">
+                    <h3>
+                        <!-- Replaced generic integration icon with specific Jira icon -->
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640">
+                            <path d="M562.5 305.7C489.6 233 393.1 135.8 321 64C155.5 228.9 78.5 305.7 78.5 305.7C70.6 313.6 70.6 326.4 78.5 334.4C211.3 466.7 140.3 395.9 321 576C700.4 198 336.7 559.3 562.5 334.3C570.5 326.4 570.5 313.6 562.5 305.7zM321 395.7L245 320L321 244.3L397 320L321 395.7z"/>
+                        </svg>
+                        Jira Integration
+                    </h3>
+                </div>
+
+                <div class="jira-content">
+                    <div class="jira-info">
+                        <p>Link this project to a Jira project to enable issue tracking integration.</p>
+                        <div class="current-link" *ngIf="project?.jiraProjectKey">
+                            <span class="link-label">Currently linked to:</span>
+                            <span class="link-value">{{ project.jiraProjectKey }}</span>
+                        </div>
+                    </div>
+
+                    <!-- Jira Project Selection -->
+                    <div *ngIf="!project.jiraProjectKey" class="jira-project-selection">
+                        <div class="form-group">
+                            <label>Select Jira Project</label>
+                            <div class="jira-dropdown-container">
+                                <button
+                                        class="jira-dropdown-trigger"
+                                        (click)="toggleJiraDropdown()"
+                                        [class.active]="isJiraDropdownOpen"
+                                >
+                                    <span *ngIf="!selectedJiraProject">Select a Jira project...</span>
+                                    <span *ngIf="selectedJiraProject">{{ selectedJiraProject.name }} ({{ selectedJiraProject.key }})</span>
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                         stroke-width="2" class="dropdown-icon" [class.rotated]="isJiraDropdownOpen">
+                                        <polyline points="6,9 12,15 18,9"/>
+                                    </svg>
+                                </button>
+
+                                <div class="jira-dropdown-menu" *ngIf="isJiraDropdownOpen">
+                                    <div class="dropdown-item" *ngFor="let project of jiraProjects" (click)="selectJiraProject(project)">
+                                        <div class="project-info">
+                                            <span class="project-name">{{ project.name }}</span>
+                                            <span class="project-key">{{ project.key }}</span>
+                                        </div>
+                                    </div>
+                                    <div class="dropdown-empty" *ngIf="jiraProjects.length === 0">
+                                        <span>No Jira projects available</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Success Message -->
+                        <div class="success-message" *ngIf="jiraLinkSuccess">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                 stroke-width="2">
+                                <path d="M9 12l2 2 4-4"/>
+                                <path d="M21 12c.552 0 1-.448 1-1V8c0-.552-.448-1-1-1h-3V4c0-.552-.448-1-1-1H7c-.552 0-1 .448-1 1v3H3c-.552 0-1 .448-1 1v3c0 .552.448 1 1 1h3v3c0 .552.448 1 1 1h10c.552 0 1-.448 1-1v-3h3z"/>
+                            </svg>
+                            Project successfully linked to Jira!
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section danger-section">
+                <div class="danger-content">
+                    <div class="danger-info">
+                        <h4>Delete Project</h4>
+                        <p>Permanently delete this project and all its sprints and models. This action cannot be undone.</p>
+                    </div>
+                    <button
+                            class="danger-button"
+                            (click)="deleteProject()"
+                            [disabled]="isDeletingProject"
+                    >
+            <span *ngIf="!isDeletingProject">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                   stroke-width="2">
+                <path d="M3 6h18"/>
+                <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
+                <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
+              </svg>
+              Delete Project
+            </span>
+                        <span *ngIf="isDeletingProject" class="loading-content">
+              <div class="spinner"></div>
+              Deleting...
+            </span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- BPMN Diff Viewer -->
+    <app-bpmn-diff-viewer
+            *ngIf="showDiffViewer"
+            [currentModel]="currentModel"
+            [previousModel]="previousModel"
+            (onClose)="closeDiffViewer()"
+    ></app-bpmn-diff-viewer>
+</div>

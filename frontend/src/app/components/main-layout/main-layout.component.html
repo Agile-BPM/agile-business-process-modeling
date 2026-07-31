@@ -1,0 +1,87 @@
+<div class="app-container">
+  <app-sidebar
+    [user]="user"
+    [projects]="projects"
+    (modelSelected)="onModelSelected($event)"
+    (projectCreated)="onProjectCreated($event)">
+  </app-sidebar>
+
+  <div class="content-area">
+    <app-header
+      *ngIf="!isEmptyState()"
+      [selectedModel]="selectedModel"
+      [currentProject]="currentProject"
+      [currentSprint]="selectedSprint"
+      [isModelFreeToEdit]="isModelFullyLoaded && selectedSprint.status === 'active'"
+      (onProjectSettingsDialogOpened)="openProjectSettings()">
+    </app-header>
+
+    <main>
+      <app-bpmn-viewer
+        *ngIf="!isEmptyState()"
+        [selectedProject]="currentProject"
+        [selectedModel]="selectedModel"
+        [selectedSprint]="selectedSprint"
+        (onModelFullyLoaded)="onModelLoaded()">
+      </app-bpmn-viewer>
+
+      <div *ngIf="isEmptyState()" class="empty-state">
+        <div class="empty-state-content">
+          <div class="empty-state-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="1.5">
+              <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
+              <line x1="8" y1="21" x2="16" y2="21"/>
+              <line x1="12" y1="17" x2="12" y2="21"/>
+              <path d="M7 13h10"/>
+              <path d="M7 9h6"/>
+            </svg>
+          </div>
+
+          <div class="empty-state-text">
+            <h2>No Project Selected</h2>
+            <p class="empty-state-description">
+              Select a project from the sidebar to start modeling your business processes, or create a new project to
+              get
+              started.
+            </p>
+          </div>
+
+          <div class="empty-state-actions">
+            <button class="primary-action" (click)="openNewProjectDialog()">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                   stroke-width="2">
+                <path d="M12 5v14"/>
+                <path d="M5 12h14"/>
+              </svg>
+              Create New Project
+            </button>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<!-- New Project Dialog -->
+<app-create-project-dialog
+  [isOpen]="isNewProjectDialogOpen"
+  (onClose)="onNewProjectDialogClose()"
+  (onCreate)="onCreateProject($event)"
+  (onOpenSettings)="onOpenSettings()"
+></app-create-project-dialog>
+
+
+<!-- Project Settings Dialog -->
+<app-project-settings-dialog
+  [isOpen]="showProjectSettings"
+  [project]="currentProject"
+  (onClose)="closeProjectSettings()"
+  (onProjectDeleted)="handleProjectDeleted($event)"
+  (onSprintCreated)="handleSprintCreated($event)"
+  (onSprintDeleted)="handleSprintDeleted($event)"
+  (onModelCreated)="handleModelCreated($event)"
+  (onModelDeleted)="handleModelDeleted($event)"
+>
+</app-project-settings-dialog>

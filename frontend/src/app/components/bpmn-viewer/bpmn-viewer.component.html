@@ -1,0 +1,111 @@
+<div class="bpmn-container">
+    <div class="editor-container">
+        <div class="canvas-container" #bpmnContainer>
+            <!-- Floating Toolbar -->
+            <div class="floating-toolbar">
+                <button (click)="zoomIn()" class="floating-tool-button" title="Zoom In">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="11" cy="11" r="8"/>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                        <line x1="11" y1="8" x2="11" y2="14"/>
+                        <line x1="8" y1="11" x2="14" y2="11"/>
+                    </svg>
+                </button>
+                <button (click)="zoomOut()" class="floating-tool-button" title="Zoom Out">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="11" cy="11" r="8"/>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                        <line x1="8" y1="11" x2="14" y2="11"/>
+                    </svg>
+                </button>
+                <button (click)="resetZoom()" class="floating-tool-button" title="Reset View">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="1 4 1 10 7 10"/>
+                        <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- View-only overlay -->
+            <div class="view-only-overlay">
+                <div class="overlay-content">
+                    <span class="overlay-text">View-Only</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="properties-panel" #propertiesPanel>
+            <h3 class="panel-title">
+                Properties
+            </h3>
+            <div class="panel-content">
+                <p *ngIf="!selectedElement" class="no-selection">
+                    Select an element to view its properties
+                </p>
+                <div *ngIf="selectedElement" class="element-properties">
+                    <!-- Show default properties only for non-custom elements -->
+                    <div *ngIf="!isCustomElement()" class="default-properties">
+                        <div class="property-group">
+                            <label>ID</label>
+                            <div class="property-value">{{ selectedElement.id }}</div>
+                        </div>
+                        <div class="property-group">
+                            <label>Type</label>
+                            <div class="property-value">{{ selectedElement.type }}</div>
+                        </div>
+                        <div class="property-group">
+                            <label>Name</label>
+                            <div class="property-value">{{ selectedElement.name || 'No name' }}</div>
+                        </div>
+                    </div>
+
+                    <!-- Custom Properties Panel -->
+                    <app-custom-properties-panel
+                            [selectedElement]="selectedElementObj"
+                            [modeler]="bpmnModeler"
+                            [jiraProjectKey]="selectedProject.jiraProjectKey"
+                            [isEditMode]="false"
+                    ></app-custom-properties-panel>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Loading Overlay -->
+    <div *ngIf="loading" class="loading-overlay">
+        <div class="spinner"></div>
+        <p>Loading diagram...</p>
+    </div>
+
+    <!-- Jira Data Loading Overlay -->
+    <div *ngIf="isLoadingJiraData" class="jira-loading-overlay">
+        <div class="jira-loading-content">
+            <div class="jira-loading-icon">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="23 4 23 10 17 10"/>
+                    <polyline points="1 20 1 14 7 14"/>
+                    <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+                </svg>
+            </div>
+            <h3>Syncing with Jira</h3>
+            <p>Fetching latest issue data...</p>
+
+            <div class="progress-container">
+                <div class="progress-bar">
+                    <div class="progress-fill" [style.width.%]="jiraDataProgress"></div>
+                </div>
+                <span class="progress-text">{{ processedJiraElements }} / {{ totalJiraElements }} issues</span>
+            </div>
+
+            <div class="loading-details">
+                <div class="loading-spinner-small"></div>
+                <span>This may take a few moments...</span>
+            </div>
+        </div>
+    </div>
+
+    <div *ngIf="error" class="error-message">
+        <p>{{ error }}</p>
+        <button (click)="loadCurrentModel()">Try Again</button>
+    </div>
+</div>

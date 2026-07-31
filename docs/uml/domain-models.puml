@@ -1,0 +1,76 @@
+@startuml
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam linetype polyline
+skinparam dpi 150
+skinparam nodesep 90
+skinparam ranksep 100
+
+skinparam defaultFontName Helvetica
+skinparam defaultFontColor #1F2937
+
+skinparam ArrowColor #5B6B7A
+skinparam ArrowThickness 1.2
+
+skinparam Class {
+  BackgroundColor #D9E7F4
+  BorderColor #2F4858
+  FontColor #1F2937
+  FontSize 13
+  AttributeFontColor #334155
+  StereotypeFontColor #475569
+}
+
+skinparam Title {
+  FontSize 20
+  FontColor #17324D
+}
+
+hide empty members
+
+class Project {
+  +id: Long
+  +name: String
+  +description: String
+  +jiraProjectKey: String
+  --
+  +addSprint(sprint: Sprint)
+  +linkToJiraProject(projectKey: String)
+  +shareWith(user: User)
+}
+
+class Sprint {
+  +id: Long
+  +name: String
+  +status: String
+  +startDate: String
+  +endDate: String
+  --
+  +endSprint()
+  +addBpmnModel(bpmnModel: BpmnModel)
+  +getCurrentBpmnModel(): BpmnModel
+}
+
+class BpmnModel {
+  +id: Long
+  +name: String
+  +bpmnXml: String
+  +createdAt: LocalDateTime
+}
+
+class User {
+  +id: Integer
+  +email: String
+  +password: String
+  +isJiraAuthenticated: boolean
+}
+
+User ||-down-o{ Project : owns
+User }o--o{ Project : shares
+
+Project ||-right-o{ Sprint : contains
+
+Sprint ||-right-o{ BpmnModel : contains
+
+@enduml

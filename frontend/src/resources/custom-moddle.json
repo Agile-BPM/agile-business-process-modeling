@@ -1,0 +1,62 @@
+{
+  "name": "CustomBpmnExtension",
+  "uri": "http://custom-bpmn/schema",
+  "prefix": "custom",
+  "xml": {
+    "tagAlias": "lowerCase"
+  },
+  "types": [
+    {
+      "name": "UserStory",
+      "extends": [
+        "bpmn:SubProcess"
+      ],
+      "properties": [
+        { "name": "key", "isAttr": true, "type": "string" },
+        { "name": "title", "isAttr": true, "type": "string" },
+        { "name": "description", "isAttr": true, "type": "string" },
+        { "name": "assignee", "isAttr": true, "type": "string" },
+        { "name": "status", "isAttr": true, "type": "string" },
+        { "name": "priority", "isAttr": true, "type": "string" },
+        { "name": "dueDate", "isAttr": true, "type": "string" },
+        { "name": "progress", "isAttr": true, "type": "double" },
+        { "name": "issueType", "isAttr": true, "type": "string" },
+        { "name": "url", "isAttr": true, "type": "string" }
+      ]
+    },
+    {
+      "name": "Epic",
+      "extends": [
+        "bpmn:SubProcess"
+      ],
+      "properties": [
+        { "name": "key", "isAttr": true, "type": "string" },
+        { "name": "title", "isAttr": true, "type": "string" },
+        { "name": "description", "isAttr": true, "type": "string" },
+        { "name": "status", "isAttr": true, "type": "string" },
+        { "name": "dueDate", "isAttr": true, "type": "string" },
+        { "name": "progress", "isAttr": true, "type": "double" },
+        { "name": "total", "isAttr": true, "type": "integer" },
+        { "name": "issueType", "isAttr": true, "type": "string" },
+        { "name": "url", "isAttr": true, "type": "string" }
+      ]
+    },
+    {
+      "name": "Subtask",
+      "extends": [
+        "bpmn:Task"
+      ],
+      "properties": [
+        { "name": "key", "isAttr": true, "type": "string" },
+        { "name": "title", "isAttr": true, "type": "string" },
+        { "name": "description", "isAttr": true, "type": "string" },
+        { "name": "assignee", "isAttr": true, "type": "string" },
+        { "name": "status", "isAttr": true, "type": "string" },
+        { "name": "priority", "isAttr": true, "type": "string" },
+        { "name": "dueDate", "isAttr": true, "type": "string" },
+        { "name": "issueType", "isAttr": true, "type": "string" },
+        { "name": "url", "isAttr": true, "type": "string" }
+      ]
+    }
+  ]
+}

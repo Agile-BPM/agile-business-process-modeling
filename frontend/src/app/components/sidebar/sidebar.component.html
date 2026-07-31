@@ -1,0 +1,100 @@
+<div class="sidebar">
+  <!-- Logo Section -->
+  <div class="logo-container">
+    <h1 class="logo">PMDAgile</h1>
+  </div>
+
+  <!-- Projects Section -->
+  <div class="projects-section">
+    <div class="section-header">
+      <h2>Projects</h2>
+      <button class="add-button" (click)="openNewProjectDialog()" title="Add Project">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="12" y1="5" x2="12" y2="19"></line>
+          <line x1="5" y1="12" x2="19" y2="12"></line>
+        </svg>
+      </button>
+    </div>
+
+    <div class="project-list">
+      <div class="project-item" *ngFor="let project of projects">
+        <!-- Project Header -->
+        <div class="project-header" (click)="toggleProject(project)">
+          <div class="project-toggle">
+            <svg class="chevron-icon"
+                 [class.expanded]="project.isExpanded"
+                 width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="9,18 15,12 9,6"></polyline>
+            </svg>
+          </div>
+          <div class="project-info">
+            <div class="project-name">{{ project.name }}</div>
+            <div class="project-description">{{ project.description }}</div>
+          </div>
+        </div>
+
+        <!-- Sprints Container -->
+        <div class="sprints-container" *ngIf="project.isExpanded">
+          <div class="sprint-item" *ngFor="let sprint of project.sprints; index as i">
+            <!-- Sprint Header -->
+            <div class="sprint-header" (click)="toggleSprint(sprint)">
+              <div class="sprint-toggle">
+                <svg class="chevron-icon"
+                     [class.expanded]="sprint.isExpanded"
+                     width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="9,18 15,12 9,6"></polyline>
+                </svg>
+              </div>
+              <div class="sprint-info">
+                <span class="sprint-name">Iteration {{ i+1 }} - {{ sprint.name }}</span>
+                <span class="sprint-status" [ngClass]="getStatusClass(sprint.status)">
+                  {{ sprint.status }}
+                </span>
+              </div>
+            </div>
+
+            <!-- Models Container -->
+            <div class="models-container" *ngIf="sprint.isExpanded">
+              <div class="model-item"
+                   *ngFor="let model of sprint.models"
+                   [class.active]="model.isSelected"
+                   (click)="selectModel(model)">
+                <div class="model-icon">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                    <polyline points="14,2 14,8 20,8"></polyline>
+                  </svg>
+                </div>
+                <span class="model-name">{{ model.name }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- User Section -->
+  <div class="user-section">
+    <div class="user-info" (click)="toggleUserMenu($event)">
+      <div class="avatar">{{ user.firstname.charAt(0).toUpperCase() }}</div>
+      <div class="user-details">
+        <div class="user-name">{{ user.firstname }}</div>
+        <div class="user-email">{{ user.email }}</div>
+      </div>
+    </div>
+
+    <div class="user-menu" *ngIf="isUserMenuOpen">
+      <button (click)="viewProfile($event)">Profile</button>
+      <button (click)="logout($event)">Logout</button>
+    </div>
+  </div>
+</div>
+
+<!-- New Project Dialog -->
+<app-create-project-dialog
+  [isOpen]="isNewProjectDialogOpen"
+  (onClose)="onNewProjectDialogClose()"
+  (onCreate)="onCreateProject($event)"
+  (onOpenSettings)="onOpenSettings()"
+></app-create-project-dialog>

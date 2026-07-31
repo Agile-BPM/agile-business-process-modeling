@@ -1,0 +1,127 @@
+<div class="custom-palette">
+  <div class="palette-header">
+    <h3 class="palette-title">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="3" width="7" height="7"/>
+        <rect x="14" y="3" width="7" height="7"/>
+        <rect x="14" y="14" width="7" height="7"/>
+        <rect x="3" y="14" width="7" height="7"/>
+      </svg>
+      Elements
+    </h3>
+  </div>
+
+  <div class="palette-content">
+    <!-- Custom Elements Section -->
+    <div class="palette-section custom-section">
+      <button class="section-header" (click)="toggleSection('custom')">
+        <span class="section-title">Custom Elements</span>
+        <svg class="chevron" [class.collapsed]="isSectionCollapsed('custom')" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="6 9 12 15 18 9"/>
+        </svg>
+      </button>
+      <div class="section-content" [class.collapsed]="isSectionCollapsed('custom')">
+        <div
+          *ngFor="let item of customElements"
+          class="palette-item"
+          draggable="true"
+          (dragstart)="onDragStart($event, item)"
+          (click)="onElementClick($event, item)"
+          [title]="item.title">
+          <div class="item-icon" [ngClass]="getIconClasses(item)">
+            <ng-container [ngSwitch]="item.icon">
+              <svg *ngSwitchCase="'epic'" width="20" height="20" viewBox="0 0 318 512" aria-hidden="true">
+                <path
+                  fill="currentColor"
+                  d="M296 160H180.6l42.6-129.8C227.2 15 215.7 0 200 0H56C44 0 33.8 8.9 32.2 20.8l-32 240C-1.7 275.2 9.5 288 24 288h118.7L96.6 482.5c-3.6 15.2 8 29.5 23.3 29.5 8.4 0 16.4-4.4 20.8-12l176-304c9.3-15.9-2.2-36-20.7-36z"/>
+              </svg>
+              <svg *ngSwitchCase="'user-story'" width="20" height="20" viewBox="0 0 384 512" aria-hidden="true">
+                <path
+                  fill="currentColor"
+                  d="M0 48V487.7C0 501.1 10.9 512 24.3 512c5 0 9.9-1.5 14-4.4L192 400 345.7 507.6c4.1 2.9 9 4.4 14 4.4c13.4 0 24.3-10.9 24.3-24.3V48c0-26.5-21.5-48-48-48H48C21.5 0 0 21.5 0 48z"/>
+              </svg>
+              <svg *ngSwitchCase="'subtask'" width="20" height="20" viewBox="0 0 448 512" aria-hidden="true">
+                <path
+                  fill="currentColor"
+                  d="M64 80c-8.8 0-16 7.2-16 16l0 320c0 8.8 7.2 16 16 16l320 0c8.8 0 16-7.2 16-16l0-320c0-8.8-7.2-16-16-16L64 80zM0 96C0 60.7 28.7 32 64 32l320 0c35.3 0 64 28.7 64 64l0 320c0 35.3-28.7 64-64 64L64 480c-35.3 0-64-28.7-64-64L0 96zM337 209L209 337c-9.4 9.4-24.6 9.4-33.9 0l-64-64c-9.4-9.4-9.4-24.6 0-33.9s24.6-9.4 33.9 0l47 47L303 175c9.4-9.4 24.6-9.4 33.9 0s9.4 24.6 0 33.9z"/>
+              </svg>
+            </ng-container>
+          </div>
+          <span class="item-label">{{ item.title }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Events Section -->
+    <div class="palette-section">
+      <button class="section-header" (click)="toggleSection('events')">
+        <span class="section-title">Events</span>
+        <svg class="chevron" [class.collapsed]="isSectionCollapsed('events')" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="6 9 12 15 18 9"/>
+        </svg>
+      </button>
+      <div class="section-content" [class.collapsed]="isSectionCollapsed('events')">
+        <div
+          *ngFor="let item of eventElements"
+          class="palette-item"
+          draggable="true"
+          (dragstart)="onDragStart($event, item)"
+          (click)="onElementClick($event, item)"
+          [title]="item.title">
+          <div class="item-icon" [ngClass]="getIconClasses(item)">
+            <span class="bpmn-palette-icon" [ngClass]="item.bpmnIcon" aria-hidden="true"></span>
+          </div>
+          <span class="item-label">{{ item.title }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tasks Section -->
+    <div class="palette-section">
+      <button class="section-header" (click)="toggleSection('tasks')">
+        <span class="section-title">Activities</span>
+        <svg class="chevron" [class.collapsed]="isSectionCollapsed('tasks')" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="6 9 12 15 18 9"/>
+        </svg>
+      </button>
+      <div class="section-content" [class.collapsed]="isSectionCollapsed('tasks')">
+        <div
+          *ngFor="let item of taskElements"
+          class="palette-item"
+          draggable="true"
+          (dragstart)="onDragStart($event, item)"
+          (click)="onElementClick($event, item)"
+          [title]="item.title">
+          <div class="item-icon" [ngClass]="getIconClasses(item)">
+            <span class="bpmn-palette-icon" [ngClass]="item.bpmnIcon" aria-hidden="true"></span>
+          </div>
+          <span class="item-label">{{ item.title }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Gateways Section -->
+    <div class="palette-section">
+      <button class="section-header" (click)="toggleSection('gateways')">
+        <span class="section-title">Gateways</span>
+        <svg class="chevron" [class.collapsed]="isSectionCollapsed('gateways')" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="6 9 12 15 18 9"/>
+        </svg>
+      </button>
+      <div class="section-content" [class.collapsed]="isSectionCollapsed('gateways')">
+        <div
+          *ngFor="let item of gatewayElements"
+          class="palette-item"
+          draggable="true"
+          (dragstart)="onDragStart($event, item)"
+          (click)="onElementClick($event, item)"
+          [title]="item.title">
+          <div class="item-icon" [ngClass]="getIconClasses(item)">
+            <span class="bpmn-palette-icon" [ngClass]="item.bpmnIcon" aria-hidden="true"></span>
+          </div>
+          <span class="item-label">{{ item.title }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

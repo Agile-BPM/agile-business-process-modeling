@@ -1,0 +1,27 @@
+import {StrictHttpResponse} from "../../strict-http-response";
+import {Observable} from "rxjs";
+import {RequestBuilder} from "../../request-builder";
+import { HttpClient, HttpContext, HttpResponse } from "@angular/common/http";
+import {filter, map} from "rxjs/operators";
+
+export interface CreateSprint$Params {
+  name: string;
+  projectId: number;
+  status: string;
+  initialBpmnModelXml?: string;
+}
+
+export function createSprint(http: HttpClient, rootUrl: string, params: CreateSprint$Params, context?: HttpContext): Observable<StrictHttpResponse<number>> {
+  const rb = new RequestBuilder(rootUrl, createSprint.PATH, 'post');
+  rb.body(params, 'application/json');
+  return http.request(
+    rb.build({responseType: 'json', accept: 'application/json', context}),
+  ).pipe(
+    filter((r: any): r is HttpResponse<any> => r instanceof HttpResponse),
+    map((r: HttpResponse<any>) => {
+      return r as StrictHttpResponse<number>;
+    })
+  );
+}
+
+createSprint.PATH = '/sprints';

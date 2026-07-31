@@ -1,0 +1,171 @@
+<div class="edit-container">
+    <!-- Floating Header Parts -->
+    <div class="floating-header-left">
+        <!-- Added PMDAgile logo -->
+        <div class="logo-badge">
+            <h1 class="logo">PMDAgile</h1>
+        </div>
+        <button class="back-button" (click)="goBack()">
+            <span class="icon">←</span>
+        </button>
+
+        <div class="model-title-section">
+            <div *ngIf="!isEditingName" class="model-title-display">
+                <h1 class="model-title">{{ currentModel?.name || '' }}</h1>
+                <button class="action-button edit-name-button" (click)="startEditingName()" title="Edit model name">
+                    <svg class="button-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+                        <path d="M362.7 19.3L314.3 67.7 444.3 197.7l48.4-48.4c25-25 25-65.5 0-90.5L453.3 19.3c-25-25-65.5-25-90.5 0zm-71 71L58.6 323.5c-10.4 10.4-18 23.3-22.2 37.4L1 481.2C-1.5 489.7 .8 498.8 7 505s15.3 8.5 23.7 6.1l120.3-35.4c14.1-4.2 27-11.8 37.4-22.2L421.7 220.3 291.7 90.3z"/>
+                    </svg>
+                    Edit Name
+                </button>
+            </div>
+
+            <div *ngIf="isEditingName" class="model-title-edit">
+                <input
+                        type="text"
+                        [(ngModel)]="tempModelName"
+                        class="model-name-input"
+                        (keyup.enter)="saveModelName()"
+                        (keyup.escape)="cancelEditingName()"
+                        #nameInput
+                />
+                <div class="edit-actions">
+                    <button class="save-name-button" (click)="saveModelName()" [disabled]="!tempModelName.trim()" title="Save model name" aria-label="Save model name">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                            <path d="M20 6 9 17l-5-5"/>
+                        </svg>
+                    </button>
+                    <button class="cancel-name-button" (click)="cancelEditingName()" title="Cancel name edit" aria-label="Cancel name edit">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                            <path d="M18 6 6 18"/>
+                            <path d="m6 6 12 12"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="floating-header-right">
+        <button class="action-button save-button" (click)="saveChanges()">
+            <svg class="button-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512">
+                <path d="M64 32C28.7 32 0 60.7 0 96V416c0 35.3 28.7 64 64 64H384c35.3 0 64-28.7 64-64V173.3c0-17-6.7-33.3-18.7-45.3L352 50.7C340 38.7 323.7 32 306.7 32H64zm0 96c0-17.7 14.3-32 32-32H288c17.7 0 32 14.3 32 32v64c0 17.7-14.3 32-32 32H96c-17.7 0-32-14.3-32-32V128zM224 288a64 64 0 1 1 0 128 64 64 0 1 1 0-128z"/>
+            </svg>
+            Save
+        </button>
+        <button class="action-button export-button" (click)="exportDiagram()">
+            <svg class="button-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+                <path d="M288 32c0-17.7-14.3-32-32-32s-32 14.3-32 32V274.7l-73.4-73.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l128 128c12.5 12.5 32.8 12.5 45.3 0l128-128c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L288 274.7V32zM64 352c-35.3 0-64 28.7-64 64v32c0 35.3 28.7 64 64 64H448c35.3 0 64-28.7 64-64V416c0-35.3-28.7-64-64-64H346.5l-45.3 45.3c-25 25-65.5 25-90.5 0L165.5 352H64zm368 56a24 24 0 1 1 0 48 24 24 0 1 1 0-48z"/>
+            </svg>
+            Export
+        </button>
+    </div>
+
+    <!-- Main Content -->
+    <div class="edit-content">
+      <!-- Custom Palette Sidebar -->
+      <app-custom-palette
+        class="palette-sidebar"
+        [bpmnModeler]="paletteBpmnModeler">
+      </app-custom-palette>
+
+        <!-- Editor Area -->
+        <div class="editor-area">
+            <div class="canvas-container" #bpmnContainer>
+                <!-- Floating Toolbar -->
+                <div class="floating-toolbar">
+                    <button (click)="zoomIn()" class="floating-tool-button" title="Zoom In">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="11" cy="11" r="8"/>
+                            <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                            <line x1="11" y1="8" x2="11" y2="14"/>
+                            <line x1="8" y1="11" x2="14" y2="11"/>
+                        </svg>
+                    </button>
+                    <button (click)="zoomOut()" class="floating-tool-button" title="Zoom Out">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="11" cy="11" r="8"/>
+                            <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                            <line x1="8" y1="11" x2="14" y2="11"/>
+                        </svg>
+                    </button>
+                    <button (click)="resetZoom()" class="floating-tool-button" title="Reset View">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="1 4 1 10 7 10"/>
+                            <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/>
+                        </svg>
+                    </button>
+                    <button (click)="undo()" class="floating-tool-button" [disabled]="!canUndo" title="Undo">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M3 7v6h6"/>
+                            <path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"/>
+                        </svg>
+                    </button>
+                    <button (click)="redo()" class="floating-tool-button" [disabled]="!canRedo" title="Redo">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 7v6h-6"/>
+                            <path d="M3 17a9 9 0 0 1 9-9 9 9 0 0 1 6 2.3l3 2.7"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <div class="properties-panel" *ngIf="selectedElement">
+                <h3 class="panel-title">Properties</h3>
+                <div class="panel-content">
+                    <div class="element-properties">
+                        <!-- Show default properties only for non-custom elements -->
+                        <div *ngIf="!isCustomElement()" class="default-properties">
+                            <div class="property-group">
+                                <label>ID</label>
+                                <div class="property-value">{{ selectedElement.id }}</div>
+                            </div>
+                            <div class="property-group">
+                                <label>Type</label>
+                                <div class="property-value">{{ selectedElement.type }}</div>
+                            </div>
+                            <div class="property-group">
+                                <label>Name</label>
+                                <input
+                                        type="text"
+                                        [value]="selectedElement.name || ''"
+                                        (change)="updateElementName($event)"
+                                        class="property-input"
+                                        placeholder="Enter name"
+                                />
+                            </div>
+                        </div>
+
+                        <!-- Custom Properties Panel (always shown when element is selected) -->
+                        <app-custom-properties-panel
+                                [selectedElement]="selectedElementObj"
+                                [modeler]="bpmnModeler"
+                                [isEditMode]="isElementEditable()"
+                                [jiraProjectKey]="jiraProjectKey"
+                                [allJiraEpics]="allJiraEpics"
+                                [allJiraStories]="allJiraStories"
+                                [allJiraSubtasks]="allJiraSubtasks"
+                        ></app-custom-properties-panel>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div *ngIf="loading" class="loading-overlay">
+        <div class="spinner"></div>
+        <p>Loading diagram...</p>
+    </div>
+
+    <!-- Error Message -->
+    <div *ngIf="error" class="error-message">
+        <p>{{ error }}</p>
+        <button (click)="loadCurrentModel()">Try Again</button>
+    </div>
+
+    <!-- Save Success Notification -->
+    <div *ngIf="saveSuccess" class="save-notification">
+        <p>Changes saved successfully!</p>
+    </div>
+
+</div>

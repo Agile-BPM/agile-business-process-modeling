@@ -1,0 +1,129 @@
+<div class="diff-overlay" (click)="onBackdropClick($event)">
+  <div class="diff-container">
+    <div class="diff-header">
+      <h2>Model Comparison</h2>
+      <button class="close-button" (click)="close()">×</button>
+    </div>
+
+    <!-- Changes Overview Section -->
+    <div class="changes-overview" *ngIf="!loading && !error && changesSummary.length > 0">
+      <div class="overview-header" (click)="toggleOverview()">
+        <h3>
+          <span class="toggle-icon" [class.expanded]="overviewExpanded">▶</span>
+          Changes Overview ({{ changesSummary.length }})
+        </h3>
+      </div>
+      <div class="overview-content" [class.expanded]="overviewExpanded">
+        <div class="changes-list">
+          <div
+            *ngFor="let change of changesSummary"
+            class="change-item"
+            [class.change-added]="change.type === 'added'"
+            [class.change-removed]="change.type === 'removed'"
+            [class.change-modified]="change.type === 'changed'"
+          >
+            <!-- Restructured to have badge inline with better layout -->
+            <div class="change-header">
+              <span class="change-badge" [class.badge-added]="change.type === 'added'" [class.badge-removed]="change.type === 'removed'" [class.badge-modified]="change.type === 'changed'">
+                <span *ngIf="change.type === 'added'">Added</span>
+                <span *ngIf="change.type === 'removed'">Removed</span>
+                <span *ngIf="change.type === 'changed'">Modified</span>
+              </span>
+              <span class="change-type-label">{{ change.elementType }}</span>
+            </div>
+            <div class="change-details">
+              <div class="change-title">{{ change.elementTitle }}</div>
+              <div class="change-descriptions">
+                <div class="change-description" *ngFor="let desc of change.descriptions">
+                  {{ desc }}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="diff-content" *ngIf="!error">
+      <div class="diff-panel">
+        <div class="panel-header">
+          <h3>Previous Version</h3>
+          <span class="version-info">{{ previousModel?.name }}</span>
+        </div>
+        <div class="bpmn-container" #oldContainer>
+          <!-- Floating Toolbar -->
+          <div class="floating-toolbar">
+            <button (click)="zoomInOld()" class="floating-tool-button" title="Zoom In">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="11" cy="11" r="8"/>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                <line x1="11" y1="8" x2="11" y2="14"/>
+                <line x1="8" y1="11" x2="14" y2="11"/>
+              </svg>
+            </button>
+            <button (click)="zoomOutOld()" class="floating-tool-button" title="Zoom Out">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="11" cy="11" r="8"/>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                <line x1="8" y1="11" x2="14" y2="11"/>
+              </svg>
+            </button>
+            <button (click)="resetZoomOld()" class="floating-tool-button" title="Reset View">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="1 4 1 10 7 10"/>
+                <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="diff-divider"></div>
+
+      <div class="diff-panel">
+        <div class="panel-header">
+          <h3>Current Version</h3>
+          <span class="version-info">{{ currentModel?.name }}</span>
+        </div>
+        <div class="bpmn-container" #newContainer>
+          <!-- Floating Toolbar -->
+          <div class="floating-toolbar">
+            <button (click)="zoomInNew()" class="floating-tool-button" title="Zoom In">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="11" cy="11" r="8"/>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                <line x1="11" y1="8" x2="11" y2="14"/>
+                <line x1="8" y1="11" x2="14" y2="11"/>
+              </svg>
+            </button>
+            <button (click)="zoomOutNew()" class="floating-tool-button" title="Zoom Out">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="11" cy="11" r="8"/>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                <line x1="8" y1="11" x2="14" y2="11"/>
+              </svg>
+            </button>
+            <button (click)="resetZoomNew()" class="floating-tool-button" title="Reset View">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="1 4 1 10 7 10"/>
+                <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="loading-state" *ngIf="loading">
+      <div class="spinner"></div>
+      <p>Loading models for comparison...</p>
+    </div>
+
+    <div class="error-state" *ngIf="error">
+      <div class="error-icon">⚠️</div>
+      <h3>Error Loading Models</h3>
+      <p>{{ error }}</p>
+      <button class="btn btn-primary" (click)="loadModels()">Retry</button>
+    </div>
+  </div>
+</div>

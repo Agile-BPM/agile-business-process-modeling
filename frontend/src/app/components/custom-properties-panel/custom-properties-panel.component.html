@@ -1,0 +1,412 @@
+<div class="custom-properties" *ngIf="customElement">
+  <div class="custom-element-header">
+    <h4>{{ customElement.label }}</h4>
+    <p class="description" *ngIf="customElement.description">{{ customElement.description }}</p>
+  </div>
+
+  <!-- Jira Issue Assignment Section -->
+  <div class="jira-assignment-section" *ngIf="isEditMode && jiraProjectKey">
+    <div class="section-divider"></div>
+    <h5 class="jira-section-title">
+      <svg class="jira-icon" width="16" height="16" viewBox="0 0 640 640" fill="currentColor">
+        <path d="M562.5 305.7C489.6 233 393.1 135.8 321 64C155.5 228.9 78.5 305.7 78.5 305.7C70.6 313.6 70.6 326.4 78.5 334.4C211.3 466.7 140.3 395.9 321 576C700.4 198 336.7 559.3 562.5 334.3C570.5 326.4 570.5 313.6 562.5 305.7zM321 395.7L245 320L321 244.3L397 320L321 395.7z"/>
+      </svg>
+      Assign Jira Issue
+    </h5>
+
+    <div class="jira-assignment-container">
+      <label for="jira-issue-search">Search and assign Jira issue</label>
+      <div class="jira-search-container" [class.has-selection]="getAssignedJiraIssue()">
+
+        <!-- Show assigned issue if one exists -->
+        <div class="assigned-issue" *ngIf="getAssignedJiraIssue() && !isSearching">
+          <div class="issue-info">
+            <div class="issue-header">
+              <span class="issue-key">{{ getAssignedJiraIssue()?.key }}</span>
+              <span class="issue-type" [attr.data-type]="getAssignedJiraIssue()?.issueType">
+                {{ getAssignedJiraIssue()?.issueType }}
+              </span>
+            </div>
+            <div class="issue-summary">{{ getAssignedJiraIssue()?.status }}</div>
+            <div class="issue-details">
+              <span class="issue-status" [attr.data-status-category]="getAssignedJiraIssue()?.statusCategory">
+                {{ getAssignedJiraIssue()?.status }}
+              </span>
+              <span class="issue-assignee" *ngIf="getAssignedJiraIssue()?.assignee">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                  <circle cx="12" cy="7" r="4"/>
+                </svg>
+                {{ getAssignedJiraIssue()?.assignee }}
+              </span>
+            </div>
+          </div>
+          <div class="issue-actions">
+            <button
+              class="issue-action-button open-button"
+              (click)="openJiraIssue(getAssignedJiraIssue()!)"
+              title="Open in Jira">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+                <polyline points="15 3 21 3 21 9"/>
+                <line x1="10" y1="14" x2="21" y2="3"/>
+              </svg>
+            </button>
+            <button
+              class="issue-action-button remove-button"
+              (click)="removeJiraAssignment()"
+              title="Remove assignment">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18"/>
+                <line x1="6" y1="6" x2="18" y2="18"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Search input and dropdown -->
+        <div class="search-input-container" *ngIf="!getAssignedJiraIssue() || isSearching">
+          <input
+            id="jira-issue-search"
+            type="text"
+            name="jira-issue-search"
+            [ngModel]="searchQuery"
+            (ngModelChange)="onSearchInput($event)"
+            (focus)="onSearchFocus()"
+            (blur)="onSearchBlur()"
+            class="jira-search-input"
+            placeholder="Search by issue key or summary..."
+            autocomplete="off"
+          />
+          <div class="search-actions" *ngIf="isSearching">
+            <button
+              class="search-action-button cancel-button"
+              (click)="cancelSearch()"
+              title="Cancel">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18"/>
+                <line x1="6" y1="6" x2="18" y2="18"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Search results dropdown -->
+        <div class="search-results" *ngIf="showSearchResults && (searchResults.length > 0 || isLoading)">
+          <div class="search-loading" *ngIf="isLoading">
+            <div class="search-spinner"></div>
+            <span>Searching Jira issues...</span>
+          </div>
+
+          <div class="search-items" *ngIf="!isLoading">
+            <button
+              *ngFor="let issue of searchResults"
+              class="search-result-item"
+              (click)="selectJiraIssue(issue)">
+              <div class="result-header">
+                <span class="result-key">{{ issue.key }}</span>
+                <span class="result-type" [attr.data-type]="issue.issueType">
+                  {{ issue.issueType }}
+                </span>
+              </div>
+              <div class="result-summary">{{ issue.title }}</div>
+              <div class="result-details">
+                <span class="result-status" [attr.data-status-category]="issue.statusCategory">
+                  {{ issue.status }}
+                </span>
+                <span class="result-assignee" *ngIf="issue.assignee">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                    <circle cx="12" cy="7" r="4"/>
+                  </svg>
+                  {{ issue.assignee }}
+                </span>
+              </div>
+            </button>
+          </div>
+
+          <div class="no-results" *ngIf="!isLoading && searchResults.length === 0 && searchQuery.length > 0">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="11" cy="11" r="8"/>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+            <span>No issues found for "{{ searchQuery }}"</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="search-help" *ngIf="!getAssignedJiraIssue() && !isSearching">
+        <p class="help-text">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="12" y1="16" x2="12" y2="12"/>
+            <line x1="12" y1="8" x2="12.01" y2="8"/>
+          </svg>
+          Start typing to search for {{ getExpectedIssueTypes() }} issues in your Jira project
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- View-only Jira assignment display -->
+  <div class="jira-assignment-view" *ngIf="!isEditMode && jiraProjectKey && getAssignedJiraIssue()">
+    <div class="section-divider"></div>
+    <h5 class="jira-section-title">
+      <svg class="jira-icon" width="16" height="16" viewBox="0 0 640 640" fill="currentColor">
+        <path d="M562.5 305.7C489.6 233 393.1 135.8 321 64C155.5 228.9 78.5 305.7 78.5 305.7C70.6 313.6 70.6 326.4 78.5 334.4C211.3 466.7 140.3 395.9 321 576C700.4 198 336.7 559.3 562.5 334.3C570.5 326.4 570.5 313.6 562.5 305.7zM321 395.7L245 320L321 244.3L397 320L321 395.7z"/>
+      </svg>
+      Assigned Jira Issue
+    </h5>
+    <div class="assigned-issue view-only">
+      <div class="issue-info">
+        <div class="issue-header">
+          <span class="issue-key">{{ getAssignedJiraIssue()?.key }}</span>
+          <span class="issue-type" [attr.data-type]="getAssignedJiraIssue()?.issueType">
+            {{ getAssignedJiraIssue()?.issueType }}
+          </span>
+        </div>
+        <div class="issue-summary">{{ getAssignedJiraIssue()?.title }}</div>
+        <div class="issue-details">
+          <span class="issue-status" [attr.data-status-category]="getAssignedJiraIssue()?.statusCategory">
+            {{ getAssignedJiraIssue()?.status }}
+          </span>
+          <span class="issue-assignee" *ngIf="getAssignedJiraIssue()?.assignee">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+              <circle cx="12" cy="7" r="4"/>
+            </svg>
+            {{ getAssignedJiraIssue()?.assignee }}
+          </span>
+        </div>
+      </div>
+      <div class="issue-actions">
+        <button
+          class="issue-action-button open-button"
+          (click)="openJiraIssue(getAssignedJiraIssue()!)"
+          title="Open in Jira">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+            <polyline points="15 3 21 3 21 9"/>
+            <line x1="10" y1="14" x2="21" y2="3"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Properties organized by importance -->
+  <div class="properties-list">
+    <!-- Key Information Section -->
+    <div class="property-section">
+      <h6 class="section-title">Key Information</h6>
+
+      <!-- Key -->
+      <div class="property-item" *ngFor="let prop of getKeyProperties()">
+        <label [for]="'prop-' + prop.name" class="property-label">
+          {{ getPropertyDisplayName(prop.name) }}
+          <span class="required" *ngIf="prop.isRequired">*</span>
+          <span class="tooltip" *ngIf="prop.description">
+            <span class="info-icon">i</span>
+            <span class="tooltip-text">{{ prop.description }}</span>
+          </span>
+        </label>
+
+        <!-- Edit mode inputs -->
+        <input
+          *ngIf="prop.type === 'string' && isEditMode"
+          [id]="'prop-' + prop.name"
+          [name]="'prop-' + prop.name"
+          type="text"
+          [ngModel]="getPropertyValue(prop.name)"
+          (ngModelChange)="updatePropertyValue(prop.name, $event)"
+          class="property-input"
+          [placeholder]="getPropertyPlaceholder(prop.name)"
+        />
+
+        <div class="checkbox-wrapper" *ngIf="prop.type === 'boolean' && isEditMode">
+          <input
+            [id]="'prop-' + prop.name"
+            [name]="'prop-' + prop.name"
+            type="checkbox"
+            [ngModel]="getPropertyValue(prop.name) === 'true'"
+            (ngModelChange)="updatePropertyValue(prop.name, $event, 'boolean')"
+            class="property-checkbox"
+          />
+          <span class="checkbox-label">{{ getPropertyValue(prop.name) === 'true' ? 'Yes' : 'No' }}</span>
+        </div>
+
+        <input
+          *ngIf="(prop.type === 'integer' || prop.type === 'float') && isEditMode"
+          [id]="'prop-' + prop.name"
+          [name]="'prop-' + prop.name"
+          [type]="prop.type === 'integer' ? 'number' : 'text'"
+          [ngModel]="getPropertyValue(prop.name)"
+          (ngModelChange)="updatePropertyValue(prop.name, $event, prop.type)"
+          class="property-input"
+          [step]="prop.type === 'integer' ? '1' : '0.01'"
+          [placeholder]="getPropertyPlaceholder(prop.name)"
+        />
+
+        <select
+          *ngIf="prop.type === 'enum' && prop.enumValues && isEditMode"
+          [id]="'prop-' + prop.name"
+          [name]="'prop-' + prop.name"
+          [ngModel]="getPropertyValue(prop.name)"
+          (ngModelChange)="updatePropertyValue(prop.name, $event)"
+          class="property-select">
+          <option value="" *ngIf="!getPropertyValue(prop.name)">Select {{ getPropertyDisplayName(prop.name) }}</option>
+          <option *ngFor="let value of prop.enumValues" [value]="value" [attr.data-status-category]="isStatusProperty(prop.name) ? getStatusCategoryForStatus(value) : null">{{ value }}</option>
+        </select>
+
+        <!-- View-only displays -->
+        <div
+          *ngIf="!isEditMode"
+          class="property-value"
+          [class.empty]="!getPropertyValue(prop.name)">
+          {{ getFormattedPropertyValue(prop.name) }}
+        </div>
+      </div>
+    </div>
+
+    <!-- Status & Progress Section -->
+    <div class="property-section" *ngIf="getStatusProperties().length > 0">
+      <h6 class="section-title">Status & Progress</h6>
+
+      <div class="property-item" *ngFor="let prop of getStatusProperties()">
+        <label [for]="'prop-' + prop.name" class="property-label">
+          {{ getPropertyDisplayName(prop.name) }}
+          <span class="required" *ngIf="prop.isRequired">*</span>
+          <span class="tooltip" *ngIf="prop.description">
+            <span class="info-icon">i</span>
+            <span class="tooltip-text">{{ prop.description }}</span>
+          </span>
+        </label>
+
+        <!-- Progress bar for progress property -->
+        <div *ngIf="isProgressProperty(prop.name) && !isEditMode" class="progress-container">
+          <div class="progress-bar">
+            <div
+              class="progress-fill"
+              [class.complete]="getPropertyValue(prop.name) >= 1"
+              [style.width.%]="getPropertyValue(prop.name) * 100 || 0">
+            </div>
+          </div>
+          <span
+            class="progress-text"
+            [class.complete]="getPropertyValue(prop.name) >= 1">
+            {{ (roundProgress(getPropertyValue(prop.name) * 100)) || 0 }}%
+          </span>
+        </div>
+
+        <!-- Edit mode inputs -->
+        <input
+          *ngIf="prop.type === 'string' && isEditMode"
+          [id]="'prop-' + prop.name"
+          type="text"
+          [name]="'prop-' + prop.name"
+          [ngModel]="getPropertyValue(prop.name)"
+          (ngModelChange)="updatePropertyValue(prop.name, $event)"
+          class="property-input"
+          [placeholder]="getPropertyPlaceholder(prop.name)"
+        />
+
+        <input
+          *ngIf="(prop.type === 'integer' || prop.type === 'float' ||  prop.type === 'double') && isEditMode"
+          [id]="'prop-' + prop.name"
+          [name]="'prop-' + prop.name"
+          [type]="prop.type === 'double' ? 'number' : 'text'"
+          [ngModel]="getPropertyValue(prop.name)"
+          (ngModelChange)="updatePropertyValue(prop.name, $event, prop.type)"
+          class="property-input"
+          [step]="prop.type === 'integer' ? '1' : '0.01'"
+          [min]="isProgressProperty(prop.name) ? '0' : undefined"
+          [max]="isProgressProperty(prop.name) ? '1' : undefined"
+          [placeholder]="getPropertyPlaceholder(prop.name)"
+        />
+
+        <select
+          *ngIf="prop.type === 'enum' && prop.enumValues && isEditMode"
+          [id]="'prop-' + prop.name"
+          [name]="'prop-' + prop.name"
+          [ngModel]="getPropertyValue(prop.name)"
+          (ngModelChange)="updatePropertyValue(prop.name, $event)"
+          class="property-select status-select">
+          <option value="" *ngIf="!getPropertyValue(prop.name)">Select {{ getPropertyDisplayName(prop.name) }}</option>
+          <option *ngFor="let value of prop.enumValues" [value]="value" [attr.data-status-category]="isStatusProperty(prop.name) ? getStatusCategoryForStatus(value) : null">{{ value }}</option>
+        </select>
+
+        <!-- View-only displays (except progress which has special handling above) -->
+        <div
+          *ngIf="!isEditMode && !isProgressProperty(prop.name)"
+          class="property-value"
+          [class.empty]="!getPropertyValue(prop.name)"
+          [class.status-badge]="isStatusProperty(prop.name)"
+          [class.priority-badge]="['userStoryPriority', 'subtaskPriority'].includes(prop.name)"
+          [attr.data-status-category]="isStatusProperty(prop.name) ? getStatusCategoryValue(prop.name) : null"
+          [attr.data-priority]="['userStoryPriority', 'subtaskPriority'].includes(prop.name) ? getPropertyValue(prop.name) : null">
+          {{ getFormattedPropertyValue(prop.name) }}
+        </div>
+      </div>
+    </div>
+
+    <!-- Additional Details Section -->
+    <div class="property-section" *ngIf="getAdditionalProperties().length > 0">
+      <h6 class="section-title">Additional Details</h6>
+
+      <div class="property-item" *ngFor="let prop of getAdditionalProperties()">
+        <label [for]="'prop-' + prop.name" class="property-label">
+          {{ getPropertyDisplayName(prop.name) }}
+          <span class="required" *ngIf="prop.isRequired">*</span>
+          <span class="tooltip" *ngIf="prop.description">
+            <span class="info-icon">i</span>
+            <span class="tooltip-text">{{ prop.description }}</span>
+          </span>
+        </label>
+
+        <!-- Edit mode inputs -->
+        <textarea
+          *ngIf="prop.name === 'description' && isEditMode"
+          [id]="'prop-' + prop.name"
+          [name]="'prop-' + prop.name"
+          [ngModel]="getPropertyValue(prop.name)"
+          (ngModelChange)="updatePropertyValue(prop.name, $event)"
+          class="property-textarea"
+          rows="3"
+          [placeholder]="getPropertyPlaceholder(prop.name)">
+        </textarea>
+
+        <input
+          *ngIf="prop.type === 'string' && prop.name !== 'description' && !isUrlProperty(prop.name) && isEditMode"
+          [id]="'prop-' + prop.name"
+          [name]="'prop-' + prop.name"
+          [type]="prop.name === 'dueDate' ? 'date' : 'text'"
+          [ngModel]="getPropertyValue(prop.name)"
+          (ngModelChange)="updatePropertyValue(prop.name, $event)"
+          class="property-input"
+          [placeholder]="getPropertyPlaceholder(prop.name)"
+        />
+
+        <input
+          *ngIf="(prop.type === 'integer' || prop.type === 'float') && isEditMode"
+          [id]="'prop-' + prop.name"
+          [name]="'prop-' + prop.name"
+          [type]="prop.type === 'integer' ? 'number' : 'text'"
+          [ngModel]="getPropertyValue(prop.name)"
+          (ngModelChange)="updatePropertyValue(prop.name, $event, prop.type)"
+          class="property-input"
+          [step]="prop.type === 'integer' ? '1' : '0.01'"
+          [placeholder]="getPropertyPlaceholder(prop.name)"
+        />
+
+        <!-- View-only displays -->
+        <div
+          *ngIf="!isEditMode || isUrlProperty(prop.name)"
+          class="property-value"
+          [class.empty]="!getPropertyValue(prop.name)"
+          [class.description-text]="prop.name === 'description'">
+          {{ getFormattedPropertyValue(prop.name) }}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,36 @@
+<header class="header">
+    <div class="current-model">
+        <div class="model-info">
+            <div class="title-section">
+                <div class="project-title" *ngIf="currentProject">{{ currentProject.name }}</div>
+                <div class="main-title">
+                    <span class="sprint-title" *ngIf="currentSprint">{{ currentSprint.name }}</span>
+                    <span class="title-separator" *ngIf="currentSprint && selectedModel"> / </span>
+                    <span class="model-title" *ngIf="selectedModel">{{ selectedModel.name }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="actions">
+        <span *ngIf="isModelLocked() && modelIsEditedBy" class="lock-status">{{ modelIsEditedBy }} is currently editing this model.</span>
+        <span *ngIf="(currentSprint && currentSprint.status === 'completed')" class="lock-status">Sprint is completed. This model is view-only.</span>
+        <span *ngIf="currentSprint && selectedModel && (currentSprint.status === 'active' && !currentModelIsLatestVersion()) " class="lock-status">A newer version of this model exists. This model is view-only.</span>
+        <button
+                class="action-button edit-button" [disabled]="isModelLocked() || currentSprint.status === 'completed' || (currentSprint.status === 'active' && !currentModelIsLatestVersion())" (click)="editModel()">
+            <svg class="button-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+                <path
+                        d="M362.7 19.3L314.3 67.7 444.3 197.7l48.4-48.4c25-25 25-65.5 0-90.5L453.3 19.3c-25-25-65.5-25-90.5 0zm-71 71L58.6 323.5c-10.4 10.4-18 23.3-22.2 37.4L1 481.2C-1.5 489.7 .8 498.8 7 505s15.3 8.5 23.7 6.1l120.3-35.4c14.1-4.2 27-11.8 37.4-22.2L421.7 220.3 291.7 90.3z"/>
+            </svg>
+            Edit Model
+        </button>
+        <button
+                class="action-button settings-button"
+                (click)="openProjectSettings()">
+            <svg class="button-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73v.18a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/>
+                <circle cx="12" cy="12" r="3"/>
+            </svg>
+            Project Settings
+        </button>
+    </div>
+</header>

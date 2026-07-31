@@ -1,0 +1,56 @@
+# THIS WORKFLOW CURRENTLY ONLY WORKS FOR DEMO VERSION OF THIS APPLICATION (branch: demo)
+name: Deploy to Elastic Beanstalk
+
+on:
+  workflow_dispatch:
+
+env:
+  AWS_REGION: eu-north-1
+  APPLICATION_NAME: pmdagile-demo
+  ENVIRONMENT_NAME: Pmdagile-demo-env
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK Corretto
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'corretto'
+          cache: maven
+
+      - name: Build with Maven
+        working-directory: backend
+        # skip tests for now
+        run: mvn -B clean package -DskipTests
+
+      - name: Create deployment package
+        run: |
+          set -e
+          JAR_PATH=$(ls backend/target/*.jar | grep -v "original" | head -n 1)
+          mkdir -p deploy
+          cp "$JAR_PATH" deploy/application.jar
+          cd deploy
+          zip -r ../app.zip .
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Deploy to Elastic Beanstalk
+        uses: aws-actions/aws-elasticbeanstalk-deploy@v1.0.0
+        with:
+          aws-region: ${{ env.AWS_REGION }}
+          application-name: ${{ env.APPLICATION_NAME }}
+          environment-name: ${{ env.ENVIRONMENT_NAME }}
+          version-label: github-${{ github.run_number }}-${{ github.sha }}
+          deployment-package-path: app.zip
